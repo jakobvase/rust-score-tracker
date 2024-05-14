@@ -1,0 +1,9 @@
+{
+  "data_path": "/app/data",
+  "pages_path": "/app/pages",
+  "acme_path": "/app/acme",
+  "cert_path": "/app/certs",
+  "host": "0.0.0.0",
+  "http_port": "80",
+  "https_port": "443"
+}

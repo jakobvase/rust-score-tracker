@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Score Tracker</title>
+  </head>
+  <body>
+    <h1>Score tracker</h1>
+    <div>
+      <h2>New game</h2>
+      <form method="post" action="/">
+        <label>Game<input type="text" name="game" required /></label>
+        <label>Date<input type="date" name="date" required /></label>
+        <h3>Players</h3>
+        <h4>First</h4>
+        <label>Name<input type="text" name="player_1_name" required /></label>
+        <label>Score<input type="text" name="player_1_score" required /></label>
+        <h4>Second</h4>
+        <label>Name<input type="text" name="player_2_name" /></label>
+        <label>Score<input type="text" name="player_2_score" /></label>
+        <h4>Third</h4>
+        <label>Name<input type="text" name="player_3_name" /></label>
+        <label>Score<input type="text" name="player_3_score" /></label>
+        <h4>Fourth</h4>
+        <label>Name<input type="text" name="player_4_name" /></label>
+        <label>Score<input type="text" name="player_4_score" /></label>
+        <h4>Fifth</h4>
+        <label>Name<input type="text" name="player_5_name" /></label>
+        <label>Score<input type="text" name="player_5_score" /></label>
+        <h4>Sixth</h4>
+        <label>Name<input type="text" name="player_6_name" /></label>
+        <label>Score<input type="text" name="player_6_score" /></label>
+        <button>Submit</button>
+      </form>
+    </div>
+    <div>
+      <h2>Played games</h2>
+      {% for game in games %}
+      <div>
+        <h3>{{ game.game }} - {{ game.date }}</li>
+        <ol>
+          {% for player in game.results %}
+          <li>{{ player.name }} - {{ player.score }}</li>
+          {% endfor %}
+        </ol>
+      </div>
+      {% endfor %}
+    </div>
+    <footer>
+      Created by Jakob Vase to learn rust
+    </footer>
+  </body>
+</html>
