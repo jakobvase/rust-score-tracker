@@ -1,14 +1,16 @@
 use crate::data::{Config, Input, Results, ScoreEntry};
 use axum::{
   extract::{Path, State},
+  http::StatusCode,
   response::Html,
-  routing::{get, post},
+  routing::get,
   Form, Router,
 };
 use minijinja::render;
 use serde_json::{from_str, to_string};
 use std::fs;
 use std::vec::Vec;
+use tower_http::validate_request::ValidateRequestHeaderLayer;
 
 async fn get_data(config: Config) -> Vec<Results> {
   from_str(&fs::read_to_string(config.data_path + "/data.json").unwrap_or("[]".to_string()))
@@ -91,10 +93,16 @@ async fn add_entry(state: State<Config>, Form(form): Form<Input>) -> Html<String
   home(state).await
 }
 
+async fn fallback() -> (StatusCode, String) {
+  (StatusCode::NOT_FOUND, "Not found".to_string())
+}
+
 pub fn get_router(config: Config) -> Router {
   Router::new()
-    .route("/", get(home))
-    .route("/", post(add_entry))
+    .route("/", get(home).post(add_entry))
     .route("/.well-known/acme-challenge/*path", get(acme_challenge))
+    .route_layer(ValidateRequestHeaderLayer::basic("", "password"))
+    .fallback(fallback)
+    // .layer(TraceLayer::new_for_http()) // TODO doesn't work yet, need to add tracing-subscriber
     .with_state(config)
 }
