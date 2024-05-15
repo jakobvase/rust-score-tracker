@@ -31,18 +31,14 @@ Stop and remove the old image `sudo docker ps`, `sudo docker rm -f <id>`,
 
 Add it to the images on the server: `sudo docker load -i image.tar`.
 
-Run it: (Currently have to mount both the certs-directory and the archive
-directory, because certbot generates sym-links :sigh:. Should just make the
-configuration contain the full path to each - and then not make the
-configuration part of the docker file, but get that in from the outside.)
+Run it:
 
 ```bash
 sudo docker run -d -p 80:80 -p 443:443 \
 -v rust-score-tracker-data:/app/data \
 -v /home/user/config.json:/app/config.json \
 -v "/home/user/score-tracker-static/.well-known/acme-challenge:/app/acme" \
--v "/etc/letsencrypt/live/host.domain:/app/certs" \
--v "/etc/letsencrypt/archive:/archive" \
+-v "/etc/letsencrypt:/app/certs" \
 rust-score-tracker --config /app/config.json
 ```
 

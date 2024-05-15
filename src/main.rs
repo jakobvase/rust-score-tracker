@@ -41,8 +41,8 @@ async fn main() {
   // build the application
   let app = get_router(config.clone());
 
-  let certificate_path: &str = &(config.cert_path.clone() + "/fullchain.pem");
-  let private_key_path: &str = &(config.cert_path.clone() + "/privkey.pem");
+  let certificate_path: &str = &config.https_cert_path.clone();
+  let private_key_path: &str = &config.https_private_key_path.clone();
 
   let ssl_config_res = RustlsConfig::from_pem_file(certificate_path, private_key_path).await;
 
