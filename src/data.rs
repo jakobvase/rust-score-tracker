@@ -23,6 +23,8 @@ pub struct Config {
   pub host: String,
   pub http_port: String,
   pub https_port: String,
+  pub username: String,
+  pub password: String,
 }
 
 #[derive(Debug, Deserialize)]

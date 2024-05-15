@@ -100,9 +100,12 @@ async fn fallback() -> (StatusCode, String) {
 pub fn get_router(config: Config) -> Router {
   Router::new()
     .route("/", get(home).post(add_entry))
+    .route_layer(ValidateRequestHeaderLayer::basic(
+      &config.username,
+      &config.password,
+    ))
     .route("/.well-known/acme-challenge/*path", get(acme_challenge))
-    .route_layer(ValidateRequestHeaderLayer::basic("", "password"))
     .fallback(fallback)
-    // .layer(TraceLayer::new_for_http()) // TODO doesn't work yet, need to add tracing-subscriber
     .with_state(config)
+  // .layer(TraceLayer::new_for_http()) // TODO doesn't work yet, need to add tracing-subscriber
 }
