@@ -26,6 +26,9 @@ Save latest image as a .tar file: `docker save -o image.tar rust-score-tracker`.
 
 Copy that to the server: `scp image.tar user@server:/home/user/image.tar`.
 
+Set up the config and copy that to the server:
+`scp release.config.json user@server:/home/user/config.json`
+
 Stop and remove the old image `sudo docker ps`, `sudo docker rm -f <id>`,
 `sudo docker image rm rust-score-tracker`
 
@@ -60,3 +63,8 @@ Followed [the let's encrypt guide](https://letsencrypt.org/getting-started/) to
 add tls, since .dev domains have to be https (who knew?). I'm using certbot,
 which is running on
 [snapd](https://snapcraft.io/docs/installing-snap-on-debian).
+
+Connect to a running docker container:
+
+- `sudo docker ps` to find the container id.
+- `sudo docker exec -it <id> bash
