@@ -66,6 +66,8 @@ Also would be interested to follow the
 [guides on security from OVH](https://help.ovhcloud.com/csm/en-gb-vps-security-tips?id=kb_article_view&sysparm_article=KB0047706).
 Not done yet though. Server up first!
 
+- Change ssh-port done!
+
 Would be nice if the app itself knew how to create the missing data.
 
 Also https://wiki.debian.org/Docker - maybe have a look at podman instead?
