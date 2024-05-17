@@ -1,10 +1,6 @@
 # Score tracker
 
-## Run
-
-`cargo run`.
-
-## Build
+## Setup
 
 Need to be able to compile to linus musl, so
 `rustup target add x86_64-unknown-linux-musl` and
@@ -16,9 +12,23 @@ Need to be able to compile to linus musl, so
 linker = "x86_64-linux-musl-gcc"
 ```
 
-Build: `cargo build --release --target=x86_64-unknown-linux-musl`. Then
-`docker build . -f release.dockerfile -t rust-score-tracker`. Then to run
-`docker run -d -p 127.0.0.1:8000:80 rust-score-tracker --config config.json`.
+For frontend, `pnpm install`.
+
+## Run
+
+Server: `cargo run`.
+
+To have live css updates, `npx tailwindcss -o ./pages/index.css --watch`.
+
+## Build
+
+- `cargo build --release --target=x86_64-unknown-linux-musl`
+- `npx tailwindcss -o ./pages/index.css --minify`
+- `docker build . -f release.dockerfile -t rust-score-tracker`
+
+Then to run the built image:
+
+- `docker run -d -p 127.0.0.1:8000:80 rust-score-tracker --config config.json`.
 
 ## Deploy
 
