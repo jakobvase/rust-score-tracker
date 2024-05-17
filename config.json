@@ -1,5 +1,5 @@
 {
-  "data_path": ".",
+  "data_path": "./data",
   "pages_path": "./pages",
   "acme_path": "./acme",
   "https_cert_path": "./certs/cert.pem",
