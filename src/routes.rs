@@ -1,8 +1,8 @@
 use crate::data::{Config, Input, Results, ScoreEntry};
 use axum::{
   extract::{Path, State},
-  http::StatusCode,
-  response::Html,
+  http::{header, StatusCode},
+  response::{Html, IntoResponse},
   routing::get,
   Form, Router,
 };
@@ -34,6 +34,13 @@ async fn home(State(config): State<Config>) -> Html<String> {
       reason.to_string()
     )),
   }
+}
+
+async fn style(State(config): State<Config>) -> impl IntoResponse {
+  (
+    [(header::CONTENT_TYPE, "text/css")],
+    fs::read_to_string(config.pages_path.clone() + "/index.css").expect("Cannot find styles"),
+  )
 }
 
 async fn acme_challenge(State(config): State<Config>, Path(path): Path<String>) -> String {
@@ -100,6 +107,7 @@ async fn fallback() -> (StatusCode, String) {
 pub fn get_router(config: Config) -> Router {
   Router::new()
     .route("/", get(home).post(add_entry))
+    .route("/index.css", get(style))
     .route_layer(ValidateRequestHeaderLayer::basic(
       &config.username,
       &config.password,

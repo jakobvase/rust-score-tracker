@@ -18,12 +18,13 @@ For frontend, `pnpm install`.
 
 Server: `cargo run`.
 
-To have live css updates, `npx tailwindcss -o ./pages/index.css --watch`.
+To have live css updates,
+`npx tailwindcss -i ./input.css -o ./pages/index.css --watch`.
 
 ## Build
 
 - `cargo build --release --target=x86_64-unknown-linux-musl`
-- `npx tailwindcss -o ./pages/index.css --minify`
+- `npx tailwindcss -i ./input.css -o ./pages/index.css --minify`
 - `docker build . -f release.dockerfile -t rust-score-tracker`
 
 Then to run the built image:
