@@ -67,6 +67,14 @@ Also would be interested to follow the
 Not done yet though. Server up first!
 
 - Change ssh-port done!
+- Setting up firewalld, since debian wiki recommends it
+- Shot myself in the foot. Enabled the firewall and then lost the connection,
+  now I can't access ssh :facepalm:. Changed the ssh back by booting in rescue
+  mode, hope I can connect now.
+- It worked! Now really setting up the firewall.
+- Done. Followed this guide to set up firewalld
+  https://docs.rockylinux.org/guides/security/firewalld-beginners/.
+- Changed the port again.
 
 Would be nice if the app itself knew how to create the missing data.
 
