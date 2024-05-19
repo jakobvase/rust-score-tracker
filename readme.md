@@ -75,6 +75,7 @@ Not done yet though. Server up first!
 - Done. Followed this guide to set up firewalld
   https://docs.rockylinux.org/guides/security/firewalld-beginners/.
 - Changed the port again.
+- Set up fail2ban too
 
 Would be nice if the app itself knew how to create the missing data.
 
