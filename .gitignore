@@ -1,2 +1,5 @@
 /target
 node_modules/
+/image.tar
+/data/data.json
+/pages/index.css

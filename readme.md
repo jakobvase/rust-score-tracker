@@ -48,7 +48,7 @@ Add it to the images on the server: `sudo docker load -i image.tar`.
 Run it:
 
 ```bash
-sudo docker run -d -p 80:80 -p 443:443 \
+podman run -d -p 8000:80 -p 8001:443 \
 -v rust-score-tracker-data:/app/data \
 -v /home/user/config.json:/app/config.json \
 -v "/home/user/score-tracker-static/.well-known/acme-challenge:/app/acme" \
@@ -81,10 +81,27 @@ Would be nice if the app itself knew how to create the missing data.
 
 Also https://wiki.debian.org/Docker - maybe have a look at podman instead?
 
+- Setting up podman to be able to run as non-root.
+- Had to set up port forwarding in firewalld because podman can't access 80
+  and 443.
+  - `sudo firewall-cmd --zone=public --add-masquerade`
+  - `sudo firewall-cmd --zone=public --add-forward-port=port=80:proto=tcp:toport=8000`
+  - `sudo firewall-cmd --zone=public --add-forward-port=port=443:proto=tcp:toport=8001`
+  - test and then `sudo firewall-cmd --runtime-to-permanent`
+- Getting errors because I need the certificates from `/etc/letsencrypt` which
+  are all root-owned. Found this great article
+  https://www.redhat.com/sysadmin/container-permission-denied-errors.
+- Changing the owner of `/etc/letsencrypt` recursively worked. Now running
+  podman! Curious if this causes problems next time I have to get new
+  certificates. But I'll worry about that then.
+
 Followed [the let's encrypt guide](https://letsencrypt.org/getting-started/) to
 add tls, since .dev domains have to be https (who knew?). I'm using certbot,
 which is running on
 [snapd](https://snapcraft.io/docs/installing-snap-on-debian).
+
+Should look into podman quadlets to make the container start again after a
+reboot.
 
 Connect to a running docker container:
 
