@@ -16,10 +16,12 @@ For frontend, `pnpm install`.
 
 ## Run
 
-Server: `cargo run`.
+Server: `cargo run -- --config config.json`.
 
 To have live css updates,
 `npx tailwindcss -i ./input.css -o ./pages/index.css --watch`.
+
+To see logs of a container, `podman logs <id> [--follow]`.
 
 ## Build
 
@@ -40,10 +42,10 @@ Copy that to the server: `scp image.tar user@server:/home/user/image.tar`.
 Set up the config and copy that to the server:
 `scp release.config.json user@server:/home/user/config.json`
 
-Stop and remove the old image `sudo docker ps`, `sudo docker rm -f <id>`,
-`sudo docker image rm rust-score-tracker`
+Stop and remove the old image `podman ps`, `podman rm -f <id>`,
+`podman image rm rust-score-tracker`
 
-Add it to the images on the server: `sudo docker load -i image.tar`.
+Add it to the images on the server: `podman load -i image.tar`.
 
 Run it:
 
@@ -64,7 +66,7 @@ to install docker on the debian instance.
 
 Also would be interested to follow the
 [guides on security from OVH](https://help.ovhcloud.com/csm/en-gb-vps-security-tips?id=kb_article_view&sysparm_article=KB0047706).
-Not done yet though. Server up first!
+Just missing the non-su user.
 
 - Change ssh-port done!
 - Setting up firewalld, since debian wiki recommends it
@@ -75,7 +77,13 @@ Not done yet though. Server up first!
 - Done. Followed this guide to set up firewalld
   https://docs.rockylinux.org/guides/security/firewalld-beginners/.
 - Changed the port again.
-- Set up fail2ban too
+- Set up fail2ban too.
+- Now setting up non-su user.
+- Not simple. `sudo useradd <name>`,
+  `sudo usermod -aG access-certificates <name>`, copy just the right files into
+  the home dir. `su - <name>` to login in new shell, otherwise podman won't
+  work - and still doesn't. Will look further into this. Probably need to setup
+  that the data dir is shared between them.
 
 Would be nice if the app itself knew how to create the missing data.
 
@@ -105,5 +113,5 @@ reboot.
 
 Connect to a running docker container:
 
-- `sudo docker ps` to find the container id.
-- `sudo docker exec -it <id> bash
+- `podman ps` to find the container id.
+- `podman exec -it <id> bash
