@@ -2,6 +2,7 @@ mod data;
 mod routes;
 
 use crate::{data::Config, routes::get_router};
+use axum::extract::Host;
 use axum::handler::HandlerWithoutStateExt;
 use axum::http::{StatusCode, Uri};
 use axum::response::Redirect;
@@ -78,31 +79,36 @@ async fn main() {
   println!("Stopping.");
 }
 
+fn make_https(uri: Uri, host: Host) -> Result<Uri, BoxError> {
+  println!("Redirecting to https! Uri: {}, host: {}", uri.to_string(), host.0);
+  let mut parts = uri.into_parts();
+
+  // Change to https
+  parts.scheme = Some(axum::http::uri::Scheme::HTTPS);
+
+  // If we don't have an ending slash, add it (I think?)
+  if parts.path_and_query.is_none() {
+    parts.path_and_query = Some("/".parse().unwrap());
+  }
+
+  parts.authority = Some(host.0.parse()?);
+
+  Ok(Uri::from_parts(parts)?)
+}
+
 async fn redirect_http_to_https<F>(config: Config, signal: F)
 where
   F: Future<Output = ()> + Send + 'static,
 {
   println!("Setting up https redirect listener");
 
-  fn make_https(config: Config, uri: Uri) -> Result<Uri, BoxError> {
-    let mut parts = uri.into_parts();
-
-    parts.scheme = Some(axum::http::uri::Scheme::HTTPS);
-
-    if parts.path_and_query.is_none() {
-      parts.path_and_query = Some("/".parse().unwrap());
-    }
-
-    parts.authority = Some((config.host + ":" + &config.https_port).parse()?);
-
-    Ok(Uri::from_parts(parts)?)
-  }
-
-  let config2 = config.clone();
-  let redirect = move |uri: Uri| async move {
-    match make_https(config2, uri) {
+  let redirect = move |uri: Uri, host: Host| async move {
+    match make_https(uri, host) {
       Ok(uri) => Ok(Redirect::permanent(&uri.to_string())),
-      _ => Err(StatusCode::BAD_REQUEST),
+      Err(err) => {
+        println!("Make https failed. Error: {}", err.to_string());
+        Err(StatusCode::BAD_REQUEST)
+      },
     }
   };
 
@@ -140,4 +146,18 @@ async fn shutdown_signal(handle: axum_server::Handle) {
   // 10 secs is how long docker will wait
   // to force shutdown
   handle.graceful_shutdown(Some(Duration::from_secs(10)));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_rewrites_http_to_https() {
+        let result2 = make_https("/".parse::<Uri>().unwrap(), Host("score-tracker.com".to_string())).unwrap();
+        assert_eq!(result2.to_string(), "https://score-tracker.com/");
+
+        let result3 = make_https("/.well-known/acme-challenge/".parse::<Uri>().unwrap(), Host("score-tracker.com".to_string())).unwrap();
+        assert_eq!(result3.to_string(), "https://score-tracker.com/.well-known/acme-challenge/");
+    }
 }
