@@ -42,8 +42,8 @@ Copy that to the server: `scp image.tar user@server:/home/user/image.tar`.
 Set up the config and copy that to the server:
 `scp release.config.json user@server:/home/user/config.json`
 
-Stop and remove the old image `podman ps`, `podman rm -f <id>`,
-`podman image rm rust-score-tracker`
+Stop and remove the old image `podman stop rust_score_tracker_server`,
+`podman rm rust_score_tracker_server`, `podman image rm rust-score-tracker`
 
 Add it to the images on the server: `podman load -i image.tar`.
 
@@ -51,6 +51,7 @@ Run it:
 
 ```bash
 podman run -d -p 8000:80 -p 8001:443 \
+--name rust_score_tracker_server \
 -v rust-score-tracker-data:/app/data \
 -v /home/user/config.json:/app/config.json \
 -v "/home/user/score-tracker-static/.well-known/acme-challenge:/app/acme" \
@@ -102,6 +103,18 @@ Also https://wiki.debian.org/Docker - maybe have a look at podman instead?
 - Changing the owner of `/etc/letsencrypt` recursively worked. Now running
   podman! Curious if this causes problems next time I have to get new
   certificates. But I'll worry about that then.
+- It did cause problems. Permissions denied.
+- Did a lot of searching, and ended up on
+  https://www.redhat.com/sysadmin/supplemental-groups-podman-containers, where I
+  finally found something that worked. Added the following to
+  `~/.config/containers/containers.conf`:
+  ```
+  [containers]
+  annotations=["run.oci.keep_original_groups=1",]
+  ```
+  which keeps the groups I added, and certbot copies the groups to new
+  certificates. Now, I only need to make it restart the server on system restart
+  or new certificates.
 
 Followed [the let's encrypt guide](https://letsencrypt.org/getting-started/) to
 add tls, since .dev domains have to be https (who knew?). I'm using certbot,
@@ -110,6 +123,44 @@ which is running on
 
 Should look into podman quadlets to make the container start again after a
 reboot.
+
+Didn't look at podman quadlets, but I added a service to systemd to start up the
+server after a reboot. It should be put in
+`/etc/systemd/system/podman-rust-score-tracker.service` and enabled with
+`systemctl enable podman-rust-score-tracker`. Added the file to the repo.
+
+Additionally turned on automatic updates and automatic reboots. The server
+already had all the tools required and enabled (I followed
+[https://wiki.debian.org/UnattendedUpgrades]), so it was just a matter of
+updating the configuration in `/etc/apt/apt.conf.d/50unattended-upgrades`.
+
+Podman service didn't start up after reboot, which is a known issue
+(https://github.com/containers/podman/issues/22197), so I added a 'user level'
+service to wait for network as a workaround.
+
+Podman recommends using quadlets instead, so I've removed the services again.
+
+Podman service still not starting up after reboot. They recommend using
+quadlets, but those are only enabled in podman 4.4, and I'm on 4.3, and debian
+11 doesn't have a more recent version, and upgrading to a newer one apparently
+isn't simple (it's about upgrading the package repository) :sadface:. So now I'm
+following this in podman 4.3:
+https://docs.podman.io/en/v4.3/markdown/podman-generate-systemd.1.html. The
+first time, it is also required to do
+`sudo systemctl enable score-tracker-server`.
+
+The tl;dr is: Make sure the server is running, and do
+
+```
+podman generate systemd rust_score_tracker_server --new > score-tracker-server.service
+sudo mv score-tracker-server.service /etc/systemd/system/
+sudo systemctl daemon-reload
+```
+
+Still not working. Will give up for now.
+
+Tried to get `unattended-upgrades` to send me emails, but didn't get that to
+work either. Enough for today.
 
 Connect to a running docker container:
 

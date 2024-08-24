@@ -1,0 +1,14 @@
+[Unit]
+Description=Rust score tracker container
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=/run/user/1000/containers
+
+[Service]
+User=debian
+Restart=always
+ExecStart=/usr/bin/podman start -a rust_score_tracker_server
+ExecStop=/usr/bin/podman stop -t 2 rust_score_tracker_server
+
+[Install]
+WantedBy=default.target
