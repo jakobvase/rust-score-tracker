@@ -90,6 +90,8 @@ Would be nice if the app itself knew how to create the missing data.
 
 Also https://wiki.debian.org/Docker - maybe have a look at podman instead?
 
+### Podman
+
 - Setting up podman to be able to run as non-root.
 - Had to set up port forwarding in firewalld because podman can't access 80
   and 443.
@@ -165,4 +167,41 @@ work either. Enough for today.
 Connect to a running docker container:
 
 - `podman ps` to find the container id.
-- `podman exec -it <id> bash
+- `podman exec -it <id> bash`
+
+Came across something recently. This blog post:
+https://matduggan.com/replace-compose-with-quadlet/. I can apparently use
+`loginctl enable-linger <username>` to make the user able to start services at
+boot without logging in. Will try that.
+
+Tried it and rebooting. Come on.
+
+So the service is starting, but it's starting as root, not as <username>. And
+that doesn't work.
+
+To see the logs for systemd, use
+`journalctl -xe -u score-tracker-server.service`.
+
+IT'S FINALLY WORKINGGGGGGGG!!!!!
+
+So! The magic thing to do was:
+
+1. Follow the guide at
+   https://docs.podman.io/en/v4.3/markdown/podman-generate-systemd.1.html.
+   That's the version of podman I have, so that's the guide I should use.
+2. Enable user lingering with `sudo loginctl enable-linger <username>`. This
+   allows that user to start services after a reboot.
+3. Start the service with the run-command above.
+4. Generate a systemd file with
+   `podman generate systemd rust_score_tracker_server --new > score-tracker-server.service`
+   (the service needs to run).
+5. `mv score-tracker-server.service ~/.config/systemd/user/`. May need to make
+   the directories along the way.
+6. `systemctl --user enable score-tracker-server.service`.
+7. `systemctl --user start score-tracker-server.service`.
+
+Just one more thing remains: I need to make it restart when there are new
+certificates (and then at some point I should check what is necessary for me to
+be able to update it with a new image). But this is a great start.
+
+Done!
