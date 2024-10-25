@@ -110,7 +110,7 @@ Also https://wiki.debian.org/Docker - maybe have a look at podman instead?
   https://www.redhat.com/sysadmin/supplemental-groups-podman-containers, where I
   finally found something that worked. Added the following to
   `~/.config/containers/containers.conf`:
-  ```
+  ```conf
   [containers]
   annotations=["run.oci.keep_original_groups=1",]
   ```
@@ -153,7 +153,7 @@ first time, it is also required to do
 
 The tl;dr is: Make sure the server is running, and do
 
-```
+```bash
 podman generate systemd rust_score_tracker_server --new > score-tracker-server.service
 sudo mv score-tracker-server.service /etc/systemd/system/
 sudo systemctl daemon-reload
@@ -167,17 +167,17 @@ work either. Enough for today.
 Connect to a running docker container:
 
 - `podman ps` to find the container id.
-- `podman exec -it <id> bash`
+- `podman exec -it <id> bash`.
 
-Came across something recently. This blog post:
-https://matduggan.com/replace-compose-with-quadlet/. I can apparently use
-`loginctl enable-linger <username>` to make the user able to start services at
-boot without logging in. Will try that.
+Came across
+[this blog post](https://matduggan.com/replace-compose-with-quadlet/) recently.
+I can apparently use `loginctl enable-linger <username>` to make the user able
+to start services at boot without logging in. Will try that.
 
 Tried it and rebooting. Come on.
 
 So the service is starting, but it's starting as root, not as <username>. And
-that doesn't work.
+that doesn't work (used `sudo podman ps` to figure this out).
 
 To see the logs for systemd, use
 `journalctl -xe -u score-tracker-server.service`.
